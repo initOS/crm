@@ -72,6 +72,19 @@ class CrmPhonecall(models.Model):
         [("in", "In"), ("out", "Out")], default="out", required=True
     )
 
+    @api.model
+    def get_view(self, view_id=None, view_type="form", **options):
+        res = super(CrmPhonecall, self).get_view(
+            view_id=view_id, view_type=view_type, **options
+        )
+        if view_type == "tree" and self.env.user.has_group(
+            "crm_phonecall.group_show_form_view"
+        ):
+            res["arch"] = self.env.ref(
+                "crm_phonecall.crm_case_inbound_phone_tree_view_no_editable"
+            ).arch
+        return res
+
     @api.onchange("partner_id")
     def _onchange_partner_id(self):
         """Contact number details should be change based on partner."""
